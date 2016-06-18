@@ -37,14 +37,14 @@
  * architectures as simply as possible.
  */
 #ifdef ARCH_64
-  #define BFD_ARCH bfd_arch_i386
-  #define BFD_MACH bfd_mach_x86_64
+  #define BFD_ARCH frame_arch_i386
+  #define BFD_MACH frame_mach_x86_64
   #define STACK_OFFSET 8
   #define MAX_ADDRESS "0xffffffffffffffff"
   #define MEM_ACCESS qword
 #elif defined(ARCH_32)
-  #define BFD_ARCH bfd_arch_i386
-  #define BFD_MACH bfd_mach_i386_i386
+  #define BFD_ARCH frame_arch_i386
+  #define BFD_MACH frame_mach_i386_i386
   #define STACK_OFFSET 4
   #define MAX_ADDRESS "0xffffffff"
   #define MEM_ACCESS dword
