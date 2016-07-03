@@ -14,7 +14,7 @@ may work on other systems, that uses apt-get.
 
 Before build tracer, you need download and install
   * [pin](https://software.intel.com/en-us/articles/pintool-downloads)
-  * autoconf, libtool, protobuf-compiler
+  * autoconf, libtool, protobuf-compiler, libboost-dev, libboost-filesystem-dev, libcrypto++-dev
   * [piqi library](http://piqi.org/doc/ocaml)
 
 Here are installation example.
@@ -54,11 +54,10 @@ $ echo 'export PIN_ROOT=$HOME/opt/pin-2.14-71313-gcc.4.4.7-linux' >>$HOME/.bashr
 $ echo 'export PATH=$PATH:$PIN_ROOT' >>$HOME/.bashrc
 ```
 
-To install autoconf, libtool, protobuf-compiler, use the
-following command
+To install apt depends, use the following command
 
 ```bash
-$ sudo apt-get install autoconf libtool protobuf-compiler libprotobuf-dev
+$ sudo apt-get install autoconf libtool protobuf-compiler libprotobuf-dev libboost-filesystem-dev libcrypto++-dev 
 ```
 To install [piqi library](http://piqi.org/doc/ocaml) with
 [opam](https://opam.ocaml.org/doc/Install.html), use the following command
@@ -89,8 +88,13 @@ Change folder to bap-pintraces and build tracer with command
 ```
 $ make
 ```
-To run executable `exec` and to save the trace data to `<process id>-exec.frames`, use
+To run executable `exec` and to save taint infromation to `<process id>-exec.frames`, use
 
 ```bash
-$ pin -injection child -t obj-intel64/gentrace.so -o exec.frames -logall_before 1 -- exec
+$ pin -injection child -t obj-intel64/gentrace.so -o exec.frames -logall_before 1 -- exec [exec args]
+```
+
+To run executable `exec` and to save the trace data to `exec.frames`, use
+```bash
+$ pin -injection child -t obj-intel64/bpt.so -o exec.frames -- exec [exec args]
 ```

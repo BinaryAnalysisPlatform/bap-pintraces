@@ -1,0 +1,6 @@
+obj-intel64/*
+obj-ia32/*
+*.frames
+*.txt
+*.log
+*.cnt
