@@ -59,8 +59,8 @@ int main(int argc, char *argv[]) {
 
     TRACE_AddInstrumentFunction(trace, static_cast<VOID*>(out));
     IMG_AddInstrumentFunction(modload, 0);
-    PIN_AddFiniFunction(fini, static_cast<VOID*>(out));
     PIN_AddSyscallEntryFunction(syscall_entry, 0);
+    PIN_AddFiniFunction(fini, static_cast<VOID*>(out));
     PIN_StartProgram();
     return 0;
 }

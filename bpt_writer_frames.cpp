@@ -234,7 +234,11 @@ struct writer_frames::impl {
     boost::scoped_ptr<std_frame_element> elem;
     ~impl() {
         elem.reset();
-        cont.finish();
+        try {
+            cont.finish();
+        } catch (proto::TraceException& e) {
+            std::cerr << "finish failed with:" << e.what() << std::endl;
+        }
     }
 };
 
