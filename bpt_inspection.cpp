@@ -12,13 +12,13 @@ static void inspect_inst_reads(INS ins, std::set<REG>& reads) {
     for (UINT32 i = 0, I = INS_OperandCount(ins); i < I; ++i) {
         if (INS_OperandIsReg(ins, i)) {
             REG reg = INS_OperandReg(ins, i);
-            REG parrent = REG_FullRegName(reg);
-            if (INS_OperandRead(ins, i)) reads.insert(parrent);
+            REG base = REG_FullRegName(reg);
+            if (INS_OperandRead(ins, i)) reads.insert(base);
             /* This is special case handle writes to partial registers,
                when the rest part of base register stays unchanged.*/
             if (INS_OperandWritten(ins, i) &&
                 REG_is_partialreg(reg) &&
-                !REG_is_gr32(reg)) reads.insert(parrent);
+                !REG_is_gr32(reg)) reads.insert(base);
         }
 
         if (INS_OperandIsMemory(ins, i) ||
@@ -52,21 +52,18 @@ static void inspect_inst_writes(INS ins, std::set<REG>& writes) {
         if (INS_OperandIsReg(ins, i) &&
             INS_OperandWritten(ins, i)) {
             REG reg = INS_OperandReg(ins, i);
-            REG parrent = REG_FullRegName(reg);
-            writes.insert(parrent);
+            writes.insert(REG_FullRegName(reg));
         }
 
         if (INS_OperandIsMemory(ins, i) ||
             INS_OperandIsAddressGenerator(ins, i)) {
             REG base = INS_OperandMemoryBaseReg(ins, i);
             if (INS_RegWContain(ins, base)) {
-                REG parrent = REG_FullRegName(base);
-                writes.insert(parrent);
+                writes.insert(REG_FullRegName(base));
             }
             REG index = INS_OperandMemoryIndexReg(ins, i);
             if (INS_RegWContain(ins, index)) {
-                REG parrent = REG_FullRegName(index);
-                writes.insert(parrent);
+                writes.insert(REG_FullRegName(index));
             }
         }
     }
@@ -75,7 +72,7 @@ static void inspect_inst_writes(INS ins, std::set<REG>& writes) {
 }
 
 
-static void copy(args_list& args, std::set<REG> set) {
+static void copy(args_list& args, const std::set<REG>& set) {
     BOOST_FOREACH(REG reg, set) {
         args(IARG_UINT32, reg);
     }

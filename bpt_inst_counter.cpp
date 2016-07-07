@@ -18,7 +18,15 @@ struct inst_counter::impl {
 inst_counter::inst_counter(const std::string& file)
     : pimpl(new impl(file)) {}
 
-void inst_counter::visit(const event& e) {}
+void inst_counter::visit(const event&) {};
+void inst_counter::visit(const modload_event&) {};
+void inst_counter::visit(const syscall_event&) {};
+void inst_counter::visit(const read_event&) {};
+void inst_counter::visit(const read_flags_event&) {};
+void inst_counter::visit(const write_event&) {};
+void inst_counter::visit(const write_flags_event&) {};
+void inst_counter::visit(const load_event&) {};
+void inst_counter::visit(const store_event&) {};
 
 void inst_counter::visit(const operation_event& e) {
     typedef map_type::iterator iterator;

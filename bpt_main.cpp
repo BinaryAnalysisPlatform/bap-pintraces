@@ -61,6 +61,7 @@ int main(int argc, char *argv[]) {
     IMG_AddInstrumentFunction(modload, 0);
     PIN_AddSyscallEntryFunction(syscall_entry, 0);
     PIN_AddFiniFunction(fini, static_cast<VOID*>(out));
-    PIN_StartProgram();
+    PIN_StartProgram(); //never returns
+    abort();
     return 0;
 }

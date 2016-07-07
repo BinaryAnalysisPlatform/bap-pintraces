@@ -295,7 +295,7 @@ endif
 
 TOOL_LIBS += -L$(HOME)/opt/libtrace/lib -ltrace -lprotobuf -lz -lpthread -lcrypto++ -lboost_filesystem
 
-TOOL_CXXFLAGS += -DUSING_PIN -I$(HOME)/opt/libtrace/include -DBPT_DEBUG
+TOOL_CXXFLAGS += -DUSING_PIN -I$(HOME)/opt/libtrace/include
 
 BAPOBJS = $(OBJDIR)pivot$(OBJ_SUFFIX) \
           $(OBJDIR)pin_misc$(OBJ_SUFFIX) \
@@ -318,7 +318,6 @@ BPTOBJS = $(OBJDIR)bpt$(OBJ_SUFFIX) \
           $(OBJDIR)bpt_register_events$(OBJ_SUFFIX) \
           $(OBJDIR)bpt_flags_events$(OBJ_SUFFIX) \
           $(OBJDIR)bpt_memory_events$(OBJ_SUFFIX) \
-          $(OBJDIR)bpt_visitor$(OBJ_SUFFIX) \
           $(OBJDIR)bpt_inst_counter$(OBJ_SUFFIX) \
           $(OBJDIR)bpt_writer_text$(OBJ_SUFFIX) \
           $(OBJDIR)bpt_writer_frames$(OBJ_SUFFIX)

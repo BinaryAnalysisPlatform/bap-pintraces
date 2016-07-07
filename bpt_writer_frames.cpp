@@ -39,8 +39,8 @@ struct std_frame_element : boost::noncopyable {
         sf->set_address(op.addr());
         sf->set_thread_id(op.tid());
         sf->set_rawbytes(string_of_bytes(op.bytes()));
-        sf->mutable_operand_pre_list();
-        sf->mutable_operand_post_list();
+        static_cast<void>(sf->mutable_operand_pre_list());
+        static_cast<void>(sf->mutable_operand_post_list());
     }
 
     void add(const read_event& e) { add(R, e); }
@@ -64,7 +64,7 @@ struct std_frame_element : boost::noncopyable {
         }
     }
 
-    ~std_frame_element() {
+    void finish() {
         cont.add(frm);
     }
 
@@ -89,7 +89,6 @@ private:
         ::reg_operand* ro = ois->mutable_reg_operand();
         ro->set_name(name);
     }
-
 
     ::operand_info_specific* create_operand(usage u,
                                             const bytes_type& data,
@@ -128,26 +127,18 @@ static const frame_architecture arch = frame_arch_i386;
 
 namespace meta {
 template <typename T>
-void init_envp(T* record, char* envp[]) {
-    while(*envp) {
-        record->add_envp(*envp);
-        ++envp;
-    }
-}
-
-template <typename T>
-void init_args(T* record, int argc, char* argv[]) {
-    for (int i = 0; i < argc; ++i) {
-        record->add_args(argv[i]);
+void init_data(T* obj, void (T::*fn)(const char*), char* data[]) {
+    while(*data) {
+        (obj->*fn)(*data++);
     }
 }
 
 void init_tracer(::tracer* tracer,
                  int argc, char* argv[], char* envp[]) {
     tracer->set_name("bpt");
-    init_args(tracer, argc, argv);
-    init_envp(tracer, envp);
-    tracer->set_version("1.0.0/bpt");
+    init_data(tracer, &::tracer::add_args, argv);
+    init_data(tracer, &::tracer::add_envp, envp);
+    tracer->set_version("1.0.0");
 }
 
 std::string md5sum(const std::string& path) {
@@ -155,17 +146,15 @@ std::string md5sum(const std::string& path) {
     CryptoPP::Weak::MD5 hash;
     CryptoPP::FileSource(
         path.c_str(), true,
-        new CryptoPP::HashFilter(
-            hash, new CryptoPP::HexEncoder(
-                new CryptoPP::StringSink(md5), false)));
+        new CryptoPP::HashFilter(hash, new CryptoPP::StringSink(md5)));
     return md5;
 }
 
 void init_target(::target* target, const std::string& path,
                  int argc, char* argv[], char* envp[]) {
     target->set_path(path);
-    init_args(target, argc, argv);
-    init_envp(target, envp);
+    init_data(target, &::target::add_args, argv);
+    init_data(target, &::target::add_envp, envp);
     target->set_md5sum(md5sum(path));
 }
 
@@ -230,16 +219,18 @@ struct writer_frames::impl {
                   char* envp[])
         : cont (file, meta::create(argc, argv, envp), arch, machine) {
     }
-    container_type cont;
-    boost::scoped_ptr<std_frame_element> elem;
+
     ~impl() {
-        elem.reset();
         try {
+            if (std_frame) std_frame->finish();
             cont.finish();
-        } catch (proto::TraceException& e) {
+        } catch (std::exception& e) {
             std::cerr << "finish failed with:" << e.what() << std::endl;
         }
     }
+    container_type cont;
+    boost::scoped_ptr<std_frame_element> std_frame;
+
 };
 
 writer_frames::writer_frames(const std::string& file,
@@ -276,14 +267,33 @@ void writer_frames::visit(const syscall_event& e) {
 }
 
 void writer_frames::visit(const operation_event& e) {
-    pimpl->elem.reset(new std_frame_element(pimpl->cont, e));
+    if (pimpl->std_frame)
+        pimpl->std_frame->finish();
+    pimpl->std_frame.reset(new std_frame_element(pimpl->cont, e));
 }
 
-void writer_frames::visit(const read_event& e) { pimpl->elem->add(e); }
-void writer_frames::visit(const read_flags_event& e) { pimpl->elem->add(e); }
-void writer_frames::visit(const write_event& e) { pimpl->elem->add(e); }
-void writer_frames::visit(const write_flags_event& e) { pimpl->elem->add(e); }
-void writer_frames::visit(const load_event& e) { pimpl->elem->add(e); }
-void writer_frames::visit(const store_event& e) { pimpl->elem->add(e); }
+void writer_frames::visit(const read_event& e) {
+    pimpl->std_frame->add(e);
+}
+
+void writer_frames::visit(const read_flags_event& e) {
+    pimpl->std_frame->add(e);
+}
+
+void writer_frames::visit(const write_event& e) {
+    pimpl->std_frame->add(e);
+}
+
+void writer_frames::visit(const write_flags_event& e) {
+    pimpl->std_frame->add(e);
+}
+
+void writer_frames::visit(const load_event& e) {
+    pimpl->std_frame->add(e);
+}
+
+void writer_frames::visit(const store_event& e) {
+    pimpl->std_frame->add(e);
+}
 
 } //namespace bpt

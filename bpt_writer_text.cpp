@@ -17,4 +17,41 @@ writer_text::writer_text(const std::string& file,
 void writer_text::visit(const event& e) {
     out << e << std::endl;
 }
+
+void writer_text::visit(const modload_event& e) {
+    out << e << std::endl;
+}
+
+void writer_text::visit(const syscall_event& e) {
+    out << e << std::endl;
+}
+
+void writer_text::visit(const operation_event& e) {
+    out << e << std::endl;
+}
+
+void writer_text::visit(const read_event& e) {
+    out << e << std::endl;
+}
+
+void writer_text::visit(const write_event& e) {
+    out << e << std::endl;
+}
+
+void writer_text::visit(const read_flags_event& e) {
+    out << e << std::endl;
+}
+
+void writer_text::visit(const write_flags_event& e) {
+    out << e << std::endl;
+}
+
+void writer_text::visit(const load_event& e) {
+    out << e << std::endl;
+}
+
+void writer_text::visit(const store_event& e) {
+    out << e << std::endl;
+}
+
 } //namespace bpt
