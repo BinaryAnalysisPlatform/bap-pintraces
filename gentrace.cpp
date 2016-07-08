@@ -10,7 +10,6 @@
 #include <stdint.h>
 #include <cstdlib>
 #include <time.h>
-
 //#include "pin_frame.h"
 //#include "pin_trace.h"
 #include "reg_mapping_pin.h"
@@ -377,6 +376,14 @@ int g_counter = 0;
 
 //TraceWriter *g_tw;
 TraceContainerWriter *g_twnew;
+
+template <typename Iterator>
+inline void add_frames(TraceContainerWriter* out,
+                       Iterator first, Iterator last) {
+    while (first != last) {
+        out->add(*first++);
+    }
+}
 
 // A taint tracker
 TaintTracker * tracker;
@@ -1012,7 +1019,7 @@ void* GetEnvWWrap(CONTEXT *ctx, AFUNPTR fp, THREADID tid) {
     LLOG("Got callback lock\n");
 
     std::vector<frame> frms = tracker->taintEnv(NULL, (wchar_t*) ret);
-    g_twnew->add<std::vector<frame> > (frms);
+    add_frames(g_twnew, frms.begin(), frms.end());
 
     PIN_ReleaseLock(&lock);
     LLOG("Releasing callback lock\n");
@@ -1048,7 +1055,7 @@ void* GetEnvAWrap(CONTEXT *ctx, AFUNPTR fp, THREADID tid) {
     LLOG("Got callback lock\n");
 
     std::vector<frame> frms = tracker->taintEnv((char*) ret, NULL);
-    g_twnew->add<std::vector<frame> > (frms);
+    add_frames(g_twnew, frms.begin(), frms.end());
 
     PIN_ReleaseLock(&lock);
     LLOG("Releasing callback lock\n");
@@ -1883,9 +1890,9 @@ VOID ThreadStart(THREADID threadid, CONTEXT *ctx, INT32 flags, VOID *v)
         char **argv = (char**) (PIN_GetContextReg(ctx, LEVEL_BASE::REG_STACK_PTR) + STACK_OFFSET);
         char **env = (char**) (PIN_GetContextReg(ctx, LEVEL_BASE::REG_STACK_PTR)+(argc+1) * STACK_OFFSET);
         std::vector<frame> frms = tracker->taintArgs(argc, argv);
-        g_twnew->add<std::vector<frame> > (frms);
+        add_frames(g_twnew, frms.begin(), frms.end());
         frms = tracker->taintEnv(env);
-        g_twnew->add <std::vector<frame> > (frms);
+        add_frames(g_twnew, frms.begin(), frms.end());
 #else /* windows */
         /* On windows, we don't taint argc and argv, but rather taint the
            output of GetComamndLineA and GetCommandLineW.  On recent
@@ -1894,7 +1901,7 @@ VOID ThreadStart(THREADID threadid, CONTEXT *ctx, INT32 flags, VOID *v)
         wchar_t *wptr = WINDOWS::GetCommandLineW();
 
         std::vector<frame> frms = tracker->taintArgs(aptr, wptr);
-        g_twnew->add<std::vector<frame> > (frms);
+        add_frames(g_twnew, frms.begin(), frms.end());
 #endif
     }
 
@@ -2534,7 +2541,7 @@ VOID FollowChild(THREADID threadid, const CONTEXT* ctxt, VOID * arg)
     assert(i < BUFFER_SIZE);
     g_threadname[i++] = 'c';
 
-    g_twnew = new TraceContainerWriter((g_threadname + KnobOut.Value()).c_str(), BFD_ARCH, BFD_MACH, default_frames_per_toc_entry, false);
+    g_twnew = new TraceContainerWriter((g_threadname + KnobOut.Value()).c_str(), BFD_ARCH, BFD_MACH, default_frames_per_toc_entry);
 
     g_bufidx = 0;
     g_kfcount = 0;
@@ -2724,7 +2731,7 @@ int main(int argc, char *argv[])
 
     ss << PIN_GetPid() << "-" << KnobOut.Value();
 
-    g_twnew = new TraceContainerWriter(ss.str().c_str(), BFD_ARCH, BFD_MACH, default_frames_per_toc_entry, false);
+    g_twnew = new TraceContainerWriter(ss.str().c_str(), BFD_ARCH, BFD_MACH, default_frames_per_toc_entry);
 
     g_bufidx = 0;
     g_kfcount = 0;

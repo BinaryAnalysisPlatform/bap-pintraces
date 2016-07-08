@@ -5,6 +5,8 @@
 ##############################################################
 
 # If the tool is built out of the kit, PIN_ROOT must be specified in the make invocation and point to the kit root.
+# uncomment CXX variable to pin g++ compiler version
+CXX := g++-4.4
 ifdef PIN_ROOT
 CONFIG_ROOT := $(PIN_ROOT)/source/tools/Config
 else

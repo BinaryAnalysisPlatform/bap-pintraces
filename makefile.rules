@@ -34,7 +34,7 @@ SANITY_SUBSET :=
 
 # This defines the tools which will be run during the the tests, and were not already defined in
 # TEST_TOOL_ROOTS.
-TOOL_ROOTS := gentrace
+TOOL_ROOTS := gentrace bpt
 
 # This defines the static analysis tools which will be run during the the tests. They should not
 # be defined in TEST_TOOL_ROOTS. If a test with the same name exists, it should be defined in
@@ -293,9 +293,9 @@ ifeq ($(TARGET_OS),windows)
 	TOOL_CXXFLAGS += -Iddk-inc
 endif
 
-TOOL_LIBS += -ltrace -lprotobuf -lz -lpthread
+TOOL_LIBS += -L$(HOME)/opt/libtrace/lib -ltrace -lprotobuf -lz -lpthread -lcrypto++ -lboost_filesystem
 
-TOOL_CXXFLAGS += -DUSING_PIN
+TOOL_CXXFLAGS += -DUSING_PIN -I$(HOME)/opt/libtrace/include
 
 BAPOBJS = $(OBJDIR)pivot$(OBJ_SUFFIX) \
           $(OBJDIR)pin_misc$(OBJ_SUFFIX) \
@@ -305,6 +305,27 @@ BAPOBJS = $(OBJDIR)pivot$(OBJ_SUFFIX) \
 
 $(OBJDIR)gentrace$(PINTOOL_SUFFIX): $(OBJDIR)gentrace$(OBJ_SUFFIX) $(BAPOBJS) $(LIBTRACE)
 	$(LINKER) $(TOOL_LDFLAGS) $(LINK_EXE)$(OBJDIR)gentrace$(PINTOOL_SUFFIX)  $^ $(TOOL_LPATHS) $(TOOL_LIBS)
+
+
+BPTOBJS = $(OBJDIR)bpt$(OBJ_SUFFIX) \
+          $(OBJDIR)bpt_args_list$(OBJ_SUFFIX) \
+          $(OBJDIR)bpt_inspection$(OBJ_SUFFIX) \
+          $(OBJDIR)bpt_events$(OBJ_SUFFIX) \
+          $(OBJDIR)bpt_bytes_io$(OBJ_SUFFIX) \
+          $(OBJDIR)bpt_modload_event$(OBJ_SUFFIX) \
+          $(OBJDIR)bpt_syscall_event$(OBJ_SUFFIX) \
+          $(OBJDIR)bpt_operation_event$(OBJ_SUFFIX) \
+          $(OBJDIR)bpt_register_events$(OBJ_SUFFIX) \
+          $(OBJDIR)bpt_flags_events$(OBJ_SUFFIX) \
+          $(OBJDIR)bpt_memory_events$(OBJ_SUFFIX) \
+          $(OBJDIR)bpt_inst_counter$(OBJ_SUFFIX) \
+          $(OBJDIR)bpt_writer_text$(OBJ_SUFFIX) \
+          $(OBJDIR)bpt_writer_frames$(OBJ_SUFFIX)
+          
+
+
+$(OBJDIR)bpt$(PINTOOL_SUFFIX): $(OBJDIR)bpt_main$(OBJ_SUFFIX) $(BPTOBJS) $(LIBTRACE)
+	$(LINKER) $(TOOL_LDFLAGS) $(LINK_EXE)$(OBJDIR)bpt$(PINTOOL_SUFFIX)  $^ $(TOOL_LPATHS) $(TOOL_LIBS)
 
 
 ###### Special libs' build rules ######
