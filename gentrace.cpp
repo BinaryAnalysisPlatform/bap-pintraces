@@ -2662,8 +2662,12 @@ int main(int argc, char *argv[])
             tracker->setTaintStdin();
         if (TaintedNetwork)
             tracker->setTaintNetwork();
-        if (TaintedEnv.Value() != "")
-            tracker->setTaintEnv(TaintedEnv.Value());
+    
+        for (uint32_t i = 0 ; i < TaintedEnv.NumberOfValues() ; i++) {
+            if (TaintedEnv.Value(i) != "") {
+                tracker->setTaintEnv(TaintedEnv.Value(i));
+            }
+        }
     }
 
     /* Get a key for thread info */
