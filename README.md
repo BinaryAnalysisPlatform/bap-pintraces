@@ -12,6 +12,9 @@ the trace data is defined in
 Note: building instructions assume that you're using Ubuntu, but it
 may work on other systems, that uses apt-get.
 
+Since this tool requires pin 2 which does not fully support Linux kernels 4.x
+and later, it is recommended to use a virtual machine with [Ubuntu 14.04.1](http://old-releases.ubuntu.com/releases/14.04.0/ubuntu-14.04.1-server-amd64.iso).
+
 Before build tracer, you need download and install
   * [pin](https://software.intel.com/en-us/articles/pintool-downloads)
   * autoconf, libtool, protobuf-compiler, libboost-dev, libboost-filesystem-dev, libcrypto++-dev
@@ -62,8 +65,12 @@ $ sudo apt-get install autoconf libtool protobuf-compiler libprotobuf-dev libboo
 To install [piqi library](http://piqi.org/doc/ocaml) with
 [opam](https://opam.ocaml.org/doc/Install.html), use the following command
 ```bash
-$ opam install piqi
+$ curl -o /usr/bin/piqi -L https://raw.github.com/alavrik/piqi-binary/master/Linux-x86_64/piqi && chmod +x /usr/bin/piqi
 ```
+(alternatively, you can try to install piqi with `opam install piqi` but this
+may be more difficult as the opam version that comes with Ubuntu 14.04.1 is too old)
+
+
 # Build process
 Download [bap-frames](https://github.com/BinaryAnalysisPlatform/bap-frames) with
 following command
